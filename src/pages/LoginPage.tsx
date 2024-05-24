@@ -44,7 +44,7 @@ const LoginPage: React.FC = () => {
                       ref={emailInputRef}
                       type="text"
                       className="form-control form-control-lg"
-                      placeholder="Email"
+                      placeholder="Username"
                     />
                   </div>
 
