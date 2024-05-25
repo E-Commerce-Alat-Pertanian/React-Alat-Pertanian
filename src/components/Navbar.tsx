@@ -1,10 +1,24 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from '../app/store';
+import { LogOut, reset } from "../features/authSlice";
 import "../assets/css/style.css";
 import logo from "../assets/img/vector.svg"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 const Navbar = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const { user } = useSelector((state: RootState) => state.auth);
+
+  const logout = () => {
+    dispatch(LogOut());
+    dispatch(reset());
+    navigate("/");
+  };
+  
   return (
     <div>
       <header
@@ -35,7 +49,7 @@ const Navbar = () => {
               <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                 {/* Tambahkan item profil lainnya di sini */}
                 <li>
-                  <button className="dropdown-item">Logout</button>
+                  <button onClick={logout} className="dropdown-item">Logout</button>
                 </li>
               </ul>
             </li>

@@ -1,4 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { RootState, AppDispatch } from '../app/store';
+import { getMe } from "../features/authSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarDays, faPrint} from "@fortawesome/free-solid-svg-icons";
 import user from "../assets/img/user.svg"
@@ -6,6 +11,20 @@ import bagShop from "../assets/img/bagShop.svg"
 import "../styles/OrderDetail.css";
 
 const OrderDetail = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const { isError } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    dispatch(getMe());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      navigate("/");
+    }
+  }, [isError, navigate]);
+  
   return (
     <div>
       <main id="main" className="main">

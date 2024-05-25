@@ -1,7 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { RootState, AppDispatch } from '../app/store';
+import { getMe } from "../features/authSlice";
 
 const AddProduct = () => {
   const [preview, setPreview] = useState("")
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const { isError } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    dispatch(getMe());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      navigate("/");
+    }
+  }, [isError, navigate]);
 
   const loadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const image = (e.target as HTMLInputElement).files?.[0];

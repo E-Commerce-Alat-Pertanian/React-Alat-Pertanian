@@ -1,81 +1,69 @@
-import React, { useRef, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { LoginUser, reset } from '../features/authSlice';
+import { RootState, AppDispatch } from '../app/store'; // Ensure this import points to the correct path
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
 const LoginPage: React.FC = () => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const dispatch = useDispatch<AppDispatch>(); // use AppDispatch type
+  const { user, isError, isSuccess, isLoading, message } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
 
-  const toDashboard = () => {
-    navigate('/dashboard');
+  useEffect(() => {
+    if (user || isSuccess) {
+      navigate('/dashboard');
+    }
+    dispatch(reset());
+  }, [user, isSuccess, dispatch, navigate]);
+
+  const Auth = (e: React.FormEvent) => {
+    e.preventDefault();
+    dispatch(LoginUser({ username, password }));
   };
 
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const passwordInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (emailInputRef.current && passwordInputRef.current) {
-      const emailInputWidth = emailInputRef.current.offsetWidth;
-      const passwordInputWidth = passwordInputRef.current.offsetWidth;
-      const maxWidth = Math.max(emailInputWidth, passwordInputWidth);
-      const loginButton = document.getElementById("loginButton");
-      if (loginButton) {
-        loginButton.style.width = maxWidth + "px";
-      }
-    }
-  }, []);
-
   return (
-    <section className="vh-100" style={{ backgroundColor: "#ffffff" }}>
+    <section className="vh-100" style={{ backgroundColor: '#ffffff' }}>
       <div className="container py-5 h-100">
         <div className="row d-flex justify-content-center align-items-center h-100">
           <div className="col-12 col-md-8 col-lg-6 col-xl-5">
-            <div
-              className="shadow-2-strong"
-              style={{ borderRadius: "1rem" }}
-            >
-                
-              <form>
+            <div className="shadow-2-strong" style={{ borderRadius: '1rem' }}>
+              <form onSubmit={Auth}>
                 <div className="card-body p-5">
-                <h3 style={{ fontWeight: "bold" }}>Login</h3>
-                  <p className="font-weight-bold text-danger"></p>
+                  <h3 style={{ fontWeight: 'bold' }}>Login</h3>
+                  {isError && <p className="font-weight-bold text-danger">{message}</p>}
                   <div className="form-outline mb-4">
                     <input
-                      ref={emailInputRef}
                       type="text"
                       className="form-control form-control-lg"
                       placeholder="Username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
                     />
                   </div>
-
                   <div className="form-outline mb-4">
                     <input
-                      ref={passwordInputRef}
                       type="password"
-                      id="typePasswordX-2"
                       className="form-control form-control-lg"
                       placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
-
                   <div className="form-check mb-3">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      value=""
-                      id="form2Example31"
-                    />
+                    <input className="form-check-input" type="checkbox" value="" id="form2Example31" />
                     <label className="form-check-label">Keep me logged in?</label>
                   </div>
-
                   <button
                     id="loginButton"
                     className="btn btn-lg btn-block d-flex justify-content-between align-items-center"
                     type="submit"
-                    style={{ backgroundColor: "#003f62", color: "white" }}
-                    onClick={toDashboard}
+                    style={{ backgroundColor: '#003f62', color: 'white' }}
                   >
-                    <span>LOGIN</span>
+                    <span>{isLoading ? 'Loading...' : 'LOGIN'}</span>
                     <FontAwesomeIcon icon={faArrowRight} />
                   </button>
                 </div>
