@@ -5,7 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { RootState, AppDispatch } from '../app/store';
 import { getMe } from "../features/authSlice";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
+import { faCirclePlus, faChevronDown, faBorderAll } from '@fortawesome/free-solid-svg-icons';
+
+import "../assets/css/style.css";
+import album from "../assets/img/album.svg";
+import order from "../assets/img/order.svg";
 
 interface Product {
   idProduct: string;
@@ -22,6 +26,8 @@ const AllProducts = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { isError } = useSelector((state: RootState) => state.auth);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [categoryCounts, setCategoryCounts] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     dispatch(getMe());
@@ -33,16 +39,32 @@ const AllProducts = () => {
     }
   }, [isError, navigate]);
 
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+  };
+
   const toAddProduct = () => {
     navigate('/product/add');
   };
 
-  const toProductDetail = () => {
-    navigate('/product/details');
+  const handleToEditProduct = async (userId: string | number): Promise<void> => {
+    try {
+      await axios.get(`http://localhost:5000/product/${userId}`);
+      getProduct();
+      navigate(`/products/edit/${userId}`);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    }
   };
 
-  const toEditProduct = () => {
-    navigate('/product/edit');
+  const handleToProductId = async (userId: string | number): Promise<void> => {
+    try {
+      await axios.get(`http://localhost:5000/product/${userId}`);
+      getProduct();
+      navigate(`/products/view/${userId}`);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    }
   };
 
   useEffect(() => {
@@ -54,6 +76,13 @@ const AllProducts = () => {
       const response = await axios.get("http://localhost:5000/product");
       setProduct(response.data);
       console.log(response.data);
+
+      const counts: { [key: string]: number } = {};
+      response.data.forEach((product: Product) => {
+      counts[product.category] = (counts[product.category] || 0) + 1;
+      });
+      setCategoryCounts(counts);
+
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -70,6 +99,62 @@ const AllProducts = () => {
 
   return (
     <div>
+      <aside id="sidebar" className="sidebar">
+        <ul className="sidebar-nav" id="sidebar-nav">
+          <li className="nav-item">
+            <a className="nav-link collapsed" href="/dashboard">
+              <FontAwesomeIcon className="me-2" icon={faBorderAll} />
+              <span>DASHBOARD</span>
+            </a>
+          </li>
+
+          <li className="nav-item">
+            <a className="nav-link collapsed" href="/products">
+              <img className="me-2" src={album} alt="" />
+              <span>ALL PRODUCTS</span>
+            </a>
+          </li>
+
+          <li className="nav-item">
+            <a className="nav-link collapsed" href="/order-list">
+              <img className="me-2" src={order} alt="" />
+              <span>ORDER LIST</span>
+            </a>
+          </li>
+          <li className="nav-item">
+            <a
+              className="nav-link collapsed"
+              data-bs-target="#forms-nav"
+              data-bs-toggle="collapse"
+              href="/"
+            >
+              <span>Categories</span>
+              <FontAwesomeIcon className="ms-auto" icon={faChevronDown} />
+            </a>
+            <ul
+              id="forms-nav"
+              className="nav-content collapse"
+              data-bs-parent="#sidebar-nav"
+            >
+              {Object.keys(categoryCounts).map(category => (
+                <li key={category}>
+                  <a
+                    href="#"
+                    onClick={() => handleCategoryClick(category)}
+                    className="d-flex justify-content-between align-items-center"
+                  >
+                    <span>{category}</span>
+                    <div className="btn btn-sm" style={{ backgroundColor: "#E7E7E3" }}>
+                      {categoryCounts[category]}
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+        </ul>
+      </aside>
+
       <main id="main" className="main">
       <div className="pagetitle" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
@@ -97,7 +182,9 @@ const AllProducts = () => {
           }}
         >
 
-        {products.map((product) => (
+{products
+  .filter(product => !selectedCategory || product.category === selectedCategory)
+  .map(product => (
           <div key={product.idProduct} className="card-body card">
             <nav className="header-nav" style={{ position: "absolute", top: "16px", right: "16px" }}>
               <ul className="d-flex align-items-center">
@@ -109,10 +196,14 @@ const AllProducts = () => {
                   </button>
                   <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                     <li>
-                      <button onClick={toProductDetail} className="dropdown-item text-primary">View</button>
+                      <button onClick={() =>
+                                  handleToProductId(product.idProduct)
+                                } className="dropdown-item text-primary">View</button>
                     </li>
                     <li>
-                      <button onClick={toEditProduct} className="dropdown-item text-primary">Edit</button>
+                      <button onClick={() =>
+                                  handleToEditProduct(product.idProduct)
+                                } className="dropdown-item text-primary">Edit</button>
                     </li>
                     <li>
                       <button onClick={() =>

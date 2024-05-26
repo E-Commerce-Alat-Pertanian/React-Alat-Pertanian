@@ -38,7 +38,6 @@ function App() {
           element={
             <>
               <Navbar />
-              <Sidebar />
               <AllProducts />
             </>
           }
@@ -64,7 +63,7 @@ function App() {
           }
         />
         <Route
-          path="/product/details"
+          path="/products/view/:id"
           element={
             <>
               <Navbar />
@@ -84,7 +83,7 @@ function App() {
           }
         />
         <Route
-          path="/product/edit"
+          path="/products/edit/:id"
           element={
             <>
               <Navbar />

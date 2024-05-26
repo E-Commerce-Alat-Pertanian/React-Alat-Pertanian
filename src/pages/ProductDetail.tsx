@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { RootState, AppDispatch } from '../app/store';
+import { useNavigate, useParams } from "react-router-dom";
+import { RootState, AppDispatch } from "../app/store";
 import { getMe } from "../features/authSlice";
 
 const ProductDetail = () => {
+  const [nama, setNama] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [preview, setPreview] = useState<string | null>(null);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { isError } = useSelector((state: RootState) => state.auth);
+  const { id } = useParams();
 
   useEffect(() => {
     dispatch(getMe());
@@ -19,7 +26,22 @@ const ProductDetail = () => {
       navigate("/");
     }
   }, [isError, navigate]);
-  
+
+  useEffect(() => {
+    getProductById();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const getProductById = async () => {
+    const response = await axios.get(`http://localhost:5000/product/${id}`);
+    setNama(response.data.nama);
+    setDescription(response.data.description);
+    setCategory(response.data.category);
+    setPrice(response.data.price);
+    setStock(response.data.stock);
+    setPreview(response.data.url);
+  };
+
   return (
     <div>
       <main id="main" className="main">
@@ -86,6 +108,8 @@ const ProductDetail = () => {
                             }}
                             placeholder="Type name here"
                             readOnly
+                            value={nama}
+                            onChange={(e) => setNama(e.target.value)}
                           />
                         </div>
                       </div>
@@ -136,9 +160,12 @@ const ProductDetail = () => {
                               outline: "none",
                               resize: "none",
                               height: "120px",
+                              width: "690px"
                             }}
                             placeholder="Type description here"
                             readOnly
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                           />
                         </div>
                       </div>
@@ -191,56 +218,8 @@ const ProductDetail = () => {
                             }}
                             placeholder="Type Category here"
                             readOnly
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <label
-                      className="card-title"
-                      style={{ fontWeight: "bolder", color: "black" }}
-                    >
-                      Brand Name
-                    </label>
-                    <div
-                      style={{
-                        height: 48,
-                        flexDirection: "column",
-                        justifyContent: "flex-start",
-                        alignItems: "flex-start",
-                        display: "flex",
-                      }}
-                    >
-                      <div
-                        style={{
-                          alignSelf: "stretch",
-                          height: 48,
-                          flexDirection: "column",
-                          justifyContent: "flex-start",
-                          alignItems: "flex-start",
-                          display: "flex",
-                        }}
-                      >
-                        <div
-                          style={{
-                            alignSelf: "stretch",
-                            height: 48,
-                            paddingLeft: 16,
-                            borderRadius: 8,
-                            border: "1px solid",
-                            justifyContent: "flex-start",
-                            display: "inline-flex",
-                          }}
-                        >
-                          <input
-                            type="text"
-                            style={{
-                              fontSize: 16,
-                              border: "none",
-                              outline: "none",
-                            }}
-                            placeholder="Type Brand name here"
-                            readOnly
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
                           />
                         </div>
                       </div>
@@ -292,119 +271,66 @@ const ProductDetail = () => {
                             }}
                             placeholder="1258"
                             readOnly
+                            value={stock}
+                            onChange={(e) => setStock(e.target.value)}
                           />
                         </div>
                       </div>
                     </div>
 
-                    <div className="row">
-                      <div className="col-lg-6">
-                        <label
-                          className="card-title"
-                          style={{ fontWeight: "bolder", color: "black" }}
-                        >
-                          Regular Price
-                        </label>
+                    <label
+                      className="card-title"
+                      style={{ fontWeight: "bolder", color: "black" }}
+                    >
+                      Regular Price
+                    </label>
+                    <div
+                      style={{
+                        height: 48,
+                        flexDirection: "column",
+                        justifyContent: "flex-start",
+                        alignItems: "flex-start",
+                        display: "flex",
+                      }}
+                    >
+                      <div
+                        style={{
+                          alignSelf: "stretch",
+                          height: 48,
+                          flexDirection: "column",
+                          justifyContent: "flex-start",
+                          alignItems: "flex-start",
+                          display: "flex",
+                        }}
+                      >
                         <div
                           style={{
+                            alignSelf: "stretch",
                             height: 48,
-                            flexDirection: "column",
+                            paddingLeft: 16,
+                            borderRadius: 8,
+                            border: "1px solid",
                             justifyContent: "flex-start",
-                            alignItems: "flex-start",
-                            display: "flex",
+                            alignItems: "center",
+                            display: "inline-flex",
                           }}
                         >
-                          <div
+                          <input
+                            type="text"
                             style={{
-                              alignSelf: "stretch",
-                              height: 48,
-                              flexDirection: "column",
-                              justifyContent: "flex-start",
-                              alignItems: "flex-start",
-                              display: "flex",
+                              fontSize: 16,
+                              border: "none",
+                              outline: "none",
                             }}
-                          >
-                            <div
-                              style={{
-                                alignSelf: "stretch",
-                                height: 48,
-                                paddingLeft: 16,
-                                borderRadius: 8,
-                                border: "1px solid",
-                                justifyContent: "flex-start",
-                                alignItems: "center",
-                                display: "inline-flex",
-                              }}
-                            >
-                              <input
-                                type="text"
-                                style={{
-                                  fontSize: 16,
-                                  border: "none",
-                                  outline: "none",
-                                }}
-                                placeholder="1258"
-                                readOnly
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-lg-6 mb-5">
-                        <label
-                          className="card-title"
-                          style={{ fontWeight: "bolder", color: "black" }}
-                        >
-                          Sale Price
-                        </label>
-                        <div
-                          style={{
-                            height: 48,
-                            flexDirection: "column",
-                            justifyContent: "flex-start",
-                            alignItems: "flex-start",
-                            display: "flex",
-                          }}
-                        >
-                          <div
-                            style={{
-                              alignSelf: "stretch",
-                              height: 48,
-                              flexDirection: "column",
-                              justifyContent: "flex-start",
-                              alignItems: "flex-start",
-                              display: "flex",
-                            }}
-                          >
-                            <div
-                              style={{
-                                alignSelf: "stretch",
-                                height: 48,
-                                paddingLeft: 16,
-                                borderRadius: 8,
-                                border: "1px #232321 solid",
-                                justifyContent: "flex-start",
-                                alignItems: "center",
-                                display: "inline-flex",
-                              }}
-                            >
-                              <input
-                                type="text"
-                                style={{
-                                  fontSize: 16,
-                                  border: "none",
-                                  outline: "none",
-                                }}
-                                placeholder="1258"
-                                readOnly
-                              />
-                            </div>
-                          </div>
+                            placeholder="1258"
+                            readOnly
+                            value={price} onChange={(e) => setPrice(e.target.value)}
+                          />
                         </div>
                       </div>
                     </div>
                   </div>
+
                   <div className="col-lg-4">
                     <label
                       className="card-title"
@@ -412,17 +338,17 @@ const ProductDetail = () => {
                     >
                       Preview Image
                     </label>
-                    {/* {preview ? (
+                    {preview ? (
                     <figure>
                         <img
                         src={preview}
-                        style={{ width: "40%" }}
+                        style={{ width: "100%" }}
                         alt="Preview Image"
                         />
                     </figure>
                     ) : (
                     ""
-                    )} */}
+                    )}
                   </div>
                 </div>
               </div>
@@ -431,7 +357,7 @@ const ProductDetail = () => {
         </section>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default ProductDetail
+export default ProductDetail;

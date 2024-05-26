@@ -1,12 +1,19 @@
+/* eslint-disable jsx-a11y/img-redundant-alt */
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { RootState, AppDispatch } from '../app/store';
+import { RootState, AppDispatch } from "../app/store";
 import { getMe } from "../features/authSlice";
 
-const AddProduct = () => {
-  const [preview, setPreview] = useState("")
+const AddProduct: React.FC = () => {
+  const [nama, setNama] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { isError } = useSelector((state: RootState) => state.auth);
@@ -21,10 +28,52 @@ const AddProduct = () => {
     }
   }, [isError, navigate]);
 
+  const saveProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("nama", nama);
+    formData.append("description", description);
+    formData.append("category", category);
+    formData.append("price", price);
+    formData.append("stock", stock);
+    if (file) {
+      formData.append("file", file);
+    }
+
+    Array.from(formData.entries()).forEach(([key, value]) => {
+      console.log(key, value);
+    });
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/product",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log(response.data);
+      navigate("/products");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(error.response?.data); // Log detailed error response
+      } else {
+        console.log(error);
+      }
+    }
+  };
+
   const loadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const image = (e.target as HTMLInputElement).files?.[0];
-    if (image) {
-      setPreview(URL.createObjectURL(image));
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFile(file); // Correct the typing here
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -44,7 +93,7 @@ const AddProduct = () => {
           </nav>
         </div>
         <section className="section">
-          <form action="">
+          <form onSubmit={saveProduct}>
             <div className="card">
               <div className="card-body">
                 <div className="row">
@@ -90,13 +139,15 @@ const AddProduct = () => {
                               fontSize: 16,
                               border: "none",
                               outline: "none",
+                              width: "100%"
                             }}
                             placeholder="Type name here"
+                            value={nama}
+                            onChange={(e) => setNama(e.target.value)}
                           />
                         </div>
                       </div>
                     </div>
-
                     <label
                       className="card-title"
                       style={{ fontWeight: "bolder", color: "black" }}
@@ -142,13 +193,15 @@ const AddProduct = () => {
                               outline: "none",
                               resize: "none",
                               height: "120px",
+                              width: "100%"
                             }}
                             placeholder="Type description here"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                           />
                         </div>
                       </div>
                     </div>
-
                     <label
                       className="card-title"
                       style={{ fontWeight: "bolder", color: "black" }}
@@ -193,62 +246,15 @@ const AddProduct = () => {
                               fontSize: 16,
                               border: "none",
                               outline: "none",
+                              width: "100%"
                             }}
                             placeholder="Type Category here"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
                           />
                         </div>
                       </div>
                     </div>
-
-                    <label
-                      className="card-title"
-                      style={{ fontWeight: "bolder", color: "black" }}
-                    >
-                      Brand Name
-                    </label>
-                    <div
-                      style={{
-                        height: 48,
-                        flexDirection: "column",
-                        justifyContent: "flex-start",
-                        alignItems: "flex-start",
-                        display: "flex",
-                      }}
-                    >
-                      <div
-                        style={{
-                          alignSelf: "stretch",
-                          height: 48,
-                          flexDirection: "column",
-                          justifyContent: "flex-start",
-                          alignItems: "flex-start",
-                          display: "flex",
-                        }}
-                      >
-                        <div
-                          style={{
-                            alignSelf: "stretch",
-                            height: 48,
-                            paddingLeft: 16,
-                            borderRadius: 8,
-                            border: "1px solid",
-                            justifyContent: "flex-start",
-                            display: "inline-flex",
-                          }}
-                        >
-                          <input
-                            type="text"
-                            style={{
-                              fontSize: 16,
-                              border: "none",
-                              outline: "none",
-                            }}
-                            placeholder="Type Brand name here"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
                     <label
                       className="card-title"
                       style={{ fontWeight: "bolder", color: "black" }}
@@ -292,119 +298,69 @@ const AddProduct = () => {
                               fontSize: 16,
                               border: "none",
                               outline: "none",
+                              width: "100%"
                             }}
                             placeholder="1258"
+                            value={stock}
+                            onChange={(e) => setStock(e.target.value)}
                           />
                         </div>
                       </div>
                     </div>
-
-                    <div className="row">
-                      <div className="col-lg-6">
-                        <label
-                          className="card-title"
-                          style={{ fontWeight: "bolder", color: "black" }}
-                        >
-                          Regular Price
-                        </label>
+                    <label
+                      className="card-title"
+                      style={{ fontWeight: "bolder", color: "black" }}
+                    >
+                      Regular Price
+                    </label>
+                    <div
+                      style={{
+                        height: 48,
+                        flexDirection: "column",
+                        justifyContent: "flex-start",
+                        alignItems: "flex-start",
+                        display: "flex",
+                      }}
+                    >
+                      <div
+                        style={{
+                          alignSelf: "stretch",
+                          height: 48,
+                          flexDirection: "column",
+                          justifyContent: "flex-start",
+                          alignItems: "flex-start",
+                          display: "flex",
+                        }}
+                      >
                         <div
                           style={{
+                            alignSelf: "stretch",
                             height: 48,
-                            flexDirection: "column",
+                            paddingLeft: 16,
+                            borderRadius: 8,
+                            border: "1px solid",
                             justifyContent: "flex-start",
-                            alignItems: "flex-start",
-                            display: "flex",
+                            alignItems: "center",
+                            display: "inline-flex",
                           }}
                         >
-                          <div
+                          <input
+                            type="text"
                             style={{
-                              alignSelf: "stretch",
-                              height: 48,
-                              flexDirection: "column",
-                              justifyContent: "flex-start",
-                              alignItems: "flex-start",
-                              display: "flex",
+                              fontSize: 16,
+                              border: "none",
+                              outline: "none",
+                              width: "100%"
                             }}
-                          >
-                            <div
-                              style={{
-                                alignSelf: "stretch",
-                                height: 48,
-                                paddingLeft: 16,
-                                borderRadius: 8,
-                                border: "1px solid",
-                                justifyContent: "flex-start",
-                                alignItems: "center",
-                                display: "inline-flex",
-                              }}
-                            >
-                              <input
-                                type="text"
-                                style={{
-                                  fontSize: 16,
-                                  border: "none",
-                                  outline: "none",
-                                }}
-                                placeholder="1258"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="col-lg-6 mb-5">
-                        <label
-                          className="card-title"
-                          style={{ fontWeight: "bolder", color: "black" }}
-                        >
-                          Sale Price
-                        </label>
-                        <div
-                          style={{
-                            height: 48,
-                            flexDirection: "column",
-                            justifyContent: "flex-start",
-                            alignItems: "flex-start",
-                            display: "flex",
-                          }}
-                        >
-                          <div
-                            style={{
-                              alignSelf: "stretch",
-                              height: 48,
-                              flexDirection: "column",
-                              justifyContent: "flex-start",
-                              alignItems: "flex-start",
-                              display: "flex",
-                            }}
-                          >
-                            <div
-                              style={{
-                                alignSelf: "stretch",
-                                height: 48,
-                                paddingLeft: 16,
-                                borderRadius: 8,
-                                border: "1px #232321 solid",
-                                justifyContent: "flex-start",
-                                alignItems: "center",
-                                display: "inline-flex",
-                              }}
-                            >
-                              <input
-                                type="text"
-                                style={{
-                                  fontSize: 16,
-                                  border: "none",
-                                  outline: "none",
-                                }}
-                                placeholder="1258"
-                              />
-                            </div>
-                          </div>
+                            placeholder="1258"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                          />
                         </div>
                       </div>
                     </div>
                   </div>
+
                   <div className="col-lg-4">
                     <label
                       className="card-title"
@@ -414,10 +370,9 @@ const AddProduct = () => {
                     </label>
                     <div className="control">
                       <div className="file">
-                        <input type="file" className="file-input" onChange={loadImage}/>
+                        <input type="file" onChange={loadImage} />
                       </div>
                     </div>
-
                     <label
                       className="card-title"
                       style={{ fontWeight: "bolder", color: "black" }}
@@ -425,18 +380,21 @@ const AddProduct = () => {
                       Preview
                     </label>
                     {preview ? (
-                    <figure>
+                      <figure>
                         <img
-                        src={preview}
-                        style={{ width: "40%" }}
-                        alt="Preview Image"
+                          src={preview}
+                          style={{ width: "100%" }}
+                          alt="Preview Image"
                         />
-                    </figure>
-                    ) : (
-                    ""
-                    )}
+                      </figure>
+                    ) : null}
                   </div>
                 </div>
+              </div>
+              <div className="card-footer">
+                <button type="submit" className="btn btn-primary">
+                  Submit
+                </button>
               </div>
             </div>
           </form>

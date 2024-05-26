@@ -31,59 +31,6 @@ const Sidebar = () => {
               <span>ORDER LIST</span>
             </a>
           </li>
-          <li className="nav-item">
-            <a
-              className="nav-link collapsed"
-              data-bs-target="#forms-nav"
-              data-bs-toggle="collapse"
-              href="/"
-            >
-              <span>Categories</span>
-              <FontAwesomeIcon className="ms-auto" icon={faChevronDown} />
-            </a>
-            <ul
-              id="forms-nav"
-              className="nav-content collapse"
-              data-bs-parent="#sidebar-nav"
-            >
-              <li>
-                <a
-                  href="#"
-                  className="d-flex justify-content-between align-items-center"
-                >
-                  <span>Pestisida</span>
-                  <div className="btn btn-sm" style={{backgroundColor: "#E7E7E3"}}>12</div>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="d-flex justify-content-between align-items-center"
-                >
-                  <span>Pupuk</span>
-                  <div className="btn btn-sm" style={{backgroundColor: "#E7E7E3"}}>12</div>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="d-flex justify-content-between align-items-center"
-                >
-                  <span>Bibit</span>
-                  <div className="btn btn-sm" style={{backgroundColor: "#E7E7E3"}}>12</div>
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  className="d-flex justify-content-between align-items-center"
-                >
-                  <span>Alat Pertanian</span>
-                  <div className="btn btn-sm" style={{backgroundColor: "#E7E7E3"}}>12</div>
-                </a>
-              </li>
-            </ul>
-          </li>
         </ul>
       </aside>
     </div>
