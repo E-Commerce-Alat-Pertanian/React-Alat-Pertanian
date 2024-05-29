@@ -5,7 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { RootState, AppDispatch } from '../app/store';
 import { getMe } from "../features/authSlice";
 
+interface Order {
+  idOrder: string;
+  status: string
+  createdAt: string;
+  // category: string;
+  customer: {
+    username: string;
+  };
+}
+
 const OrderList = () => {
+  const [orders, setOrder] = useState<Order[]>([]);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { isError } = useSelector((state: RootState) => state.auth);
@@ -22,6 +33,26 @@ const OrderList = () => {
 
   const toOrderDetail = () => {
     navigate("/order-detail");
+  };
+
+  useEffect(() => {
+    getOrder();
+  }, []);
+
+  const getOrder = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/order/order");
+      setOrder(response.data.data);
+      console.log(response.data.data);
+
+      // const counts: { [key: string]: number } = {};
+      // response.data.forEach((product: Product) => {
+      // counts[product.category] = (counts[product.category] || 0) + 1;
+      // });
+      // setCategoryCounts(counts);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
 
   return (
@@ -72,7 +103,6 @@ const OrderList = () => {
                   >
                     Recent Purchase
                   </h5>
-
                   <table id="table-id" className="table datatable printable">
                     <thead>
                       <tr>
@@ -80,17 +110,16 @@ const OrderList = () => {
                         <th>Date</th>
                         <th>Customer Name</th>
                         <th>Status</th>
-                        <th>Amount</th>
                         <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>#1</td>
-                        <td>s</td>
-                        <td>sd</td>
-                        <td>twer</td>
-                        <td>ewwrg3t</td>
+                    {orders.map((order, index) => (
+                      <tr key={order.idOrder}>
+                        <td>{index + 1}</td>
+                        <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td>{order.customer.username}</td>
+                        <td>{order.status}</td>
                         <td>
                           <button
                             className="btn btn-primary"
@@ -100,26 +129,8 @@ const OrderList = () => {
                           </button>
                         </td>
                       </tr>
-                      <tr>
-                        <td>#2</td>
-                        <td>s</td>
-                        <td>sd</td>
-                        <td>twer</td>
-                        <td>sdwas</td>
-                        <td>
-                          <button className="btn btn-primary">View</button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>#3</td>
-                        <td>s</td>
-                        <td>sd</td>
-                        <td>twer</td>
-                        <td>ewwrg3t</td>
-                        <td>
-                          <button className="btn btn-primary">View</button>
-                        </td>
-                      </tr>
+                      ))}
+
                     </tbody>
                   </table>
                 </div>

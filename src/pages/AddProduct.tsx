@@ -9,13 +9,13 @@ import { getMe } from "../features/authSlice";
 const AddProduct: React.FC = () => {
   const [nama, setNama] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [idCategory, setIdCategory] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const { isError } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
@@ -33,20 +33,17 @@ const AddProduct: React.FC = () => {
     const formData = new FormData();
     formData.append("nama", nama);
     formData.append("description", description);
-    formData.append("category", category);
+    formData.append("idCategory", idCategory);
     formData.append("price", price);
     formData.append("stock", stock);
     if (file) {
       formData.append("file", file);
     }
 
-    Array.from(formData.entries()).forEach(([key, value]) => {
-      console.log(key, value);
-    });
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/product",
+        "http://localhost:5000/produk/product",
         formData,
         {
           headers: {
@@ -139,7 +136,7 @@ const AddProduct: React.FC = () => {
                               fontSize: 16,
                               border: "none",
                               outline: "none",
-                              width: "100%"
+                              width: "100%",
                             }}
                             placeholder="Type name here"
                             value={nama}
@@ -193,7 +190,7 @@ const AddProduct: React.FC = () => {
                               outline: "none",
                               resize: "none",
                               height: "120px",
-                              width: "100%"
+                              width: "100%",
                             }}
                             placeholder="Type description here"
                             value={description}
@@ -240,18 +237,30 @@ const AddProduct: React.FC = () => {
                             display: "inline-flex",
                           }}
                         >
-                          <input
-                            type="text"
+                          <select
+                            name="course"
+                            id="course"
                             style={{
                               fontSize: 16,
                               border: "none",
                               outline: "none",
-                              width: "100%"
+                              width: "100%",
                             }}
-                            placeholder="Type Category here"
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                          />
+                            required
+                            value={idCategory}
+                            onChange={(e) => setIdCategory(e.target.value)}
+                          >
+                            <option value="1">
+                              Pupuk
+                            </option>
+                            <option value="2">Pestisida</option>
+                            <option value="3">
+                              Bibit
+                            </option>
+                            <option value="4">
+                              Alat Pertanian
+                            </option>
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -298,7 +307,7 @@ const AddProduct: React.FC = () => {
                               fontSize: 16,
                               border: "none",
                               outline: "none",
-                              width: "100%"
+                              width: "100%",
                             }}
                             placeholder="1258"
                             value={stock}
@@ -350,7 +359,7 @@ const AddProduct: React.FC = () => {
                               fontSize: 16,
                               border: "none",
                               outline: "none",
-                              width: "100%"
+                              width: "100%",
                             }}
                             placeholder="1258"
                             value={price}

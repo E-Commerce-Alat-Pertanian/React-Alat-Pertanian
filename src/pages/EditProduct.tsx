@@ -9,7 +9,7 @@ import { getMe } from "../features/authSlice";
 const EditProduct = () => {
   const [nama, setNama] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [idCategory, setIdCategory] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -35,10 +35,10 @@ const EditProduct = () => {
   }, []);
 
   const getProductById = async () => {
-    const response = await axios.get(`http://localhost:5000/product/${id}`);
+    const response = await axios.get(`http://localhost:5000/produk/${id}`);
     setNama(response.data.nama);
     setDescription(response.data.description);
-    setCategory(response.data.category);
+    setIdCategory(response.data.idCategory);
     setPrice(response.data.price);
     setStock(response.data.stock);
     setFile(response.data.image)
@@ -50,7 +50,7 @@ const EditProduct = () => {
     const formData = new FormData();
     formData.append("nama", nama);
     formData.append("description", description);
-    formData.append("category", category);
+    formData.append("idCategory", idCategory);
     formData.append("price", price);
     formData.append("stock", stock);
     if (file) {
@@ -63,7 +63,7 @@ const EditProduct = () => {
 
     try {
       const response = await axios.patch(
-        `http://localhost:5000/product/${id}`,
+        `http://localhost:5000/produk/product/${id}`,
         formData,
         {
           headers: {
@@ -266,7 +266,7 @@ const EditProduct = () => {
                               width: "100%",
                             }}
                             placeholder="Type Category here"
-                            value={category} onChange={(e) => setCategory(e.target.value)}
+                            value={idCategory} onChange={(e) => setIdCategory(e.target.value)}
                           />
                         </div>
                       </div>

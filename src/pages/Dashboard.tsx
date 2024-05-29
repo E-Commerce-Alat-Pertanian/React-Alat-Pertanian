@@ -6,7 +6,19 @@ import { RootState, AppDispatch } from '../app/store';
 import { getMe } from "../features/authSlice";
 import bag from "../assets/img/bag.svg";
 
+interface Order {
+  idOrder: string;
+  status: string
+  createdAt: string;
+  // category: string;
+  customer: {
+    username: string;
+  };
+  ongkir: string;
+}
+
 const Dashboard = () => {
+  const [orders, setOrder] = useState<Order[]>([]);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { isError } = useSelector((state: RootState) => state.auth);
@@ -20,6 +32,26 @@ const Dashboard = () => {
       navigate("/");
     }
   }, [isError, navigate]);
+
+  useEffect(() => {
+    getOrder();
+  }, []);
+
+  const getOrder = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/order/order");
+      setOrder(response.data.data);
+      console.log(response.data.data);
+
+      // const counts: { [key: string]: number } = {};
+      // response.data.forEach((product: Product) => {
+      // counts[product.category] = (counts[product.category] || 0) + 1;
+      // });
+      // setCategoryCounts(counts);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   return (
     <div>
@@ -155,31 +187,18 @@ const Dashboard = () => {
                         <th>Date</th>
                         <th>Customer Name</th>
                         <th>Status</th>
-                        <th>Amount</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>#1</td>
-                        <td>s</td>
-                        <td>sd</td>
-                        <td>twer</td>
-                        <td>ewwrg3t</td>
+                    {orders.map((order, index) => (
+                      <tr key={order.idOrder}>
+                        <td>{index + 1}</td>
+                        <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                        <td>{order.customer.username}</td>
+                        <td>{order.status}</td>
                       </tr>
-                      <tr>
-                        <td>#2</td>
-                        <td>s</td>
-                        <td>sd</td>
-                        <td>twer</td>
-                        <td>ewwrg3t</td>
-                      </tr>
-                      <tr>
-                        <td>#3</td>
-                        <td>s</td>
-                        <td>sd</td>
-                        <td>twer</td>
-                        <td>ewwrg3t</td>
-                      </tr>
+                      ))}
+        
                     </tbody>
                   </table>
                 </div>

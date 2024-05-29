@@ -8,7 +8,7 @@ import { getMe } from "../features/authSlice";
 const ProductDetail = () => {
   const [nama, setNama] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
+  const [idCategory, setIdCategory] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
   const [preview, setPreview] = useState<string | null>(null);
@@ -33,10 +33,10 @@ const ProductDetail = () => {
   }, []);
 
   const getProductById = async () => {
-    const response = await axios.get(`http://localhost:5000/product/${id}`);
+    const response = await axios.get(`http://localhost:5000/produk/${id}`);
     setNama(response.data.nama);
     setDescription(response.data.description);
-    setCategory(response.data.category);
+    setIdCategory(response.data.idCategory);
     setPrice(response.data.price);
     setStock(response.data.stock);
     setPreview(response.data.url);
@@ -160,7 +160,7 @@ const ProductDetail = () => {
                               outline: "none",
                               resize: "none",
                               height: "120px",
-                              width: "690px"
+                              width: "690px",
                             }}
                             placeholder="Type description here"
                             readOnly
@@ -209,18 +209,24 @@ const ProductDetail = () => {
                             display: "inline-flex",
                           }}
                         >
-                          <input
-                            type="text"
+                          <select
+                            name="course"
+                            id="course"
                             style={{
                               fontSize: 16,
                               border: "none",
                               outline: "none",
+                              width: "100%",
                             }}
-                            placeholder="Type Category here"
-                            readOnly
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                          />
+                            required
+                            value={idCategory}
+                            onChange={(e) => setIdCategory(e.target.value)}
+                          >
+                            <option value="1">Pupuk</option>
+                            <option value="2">Pestisida</option>
+                            <option value="3">Bibit</option>
+                            <option value="4">Alat Pertanian</option>
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -324,7 +330,8 @@ const ProductDetail = () => {
                             }}
                             placeholder="1258"
                             readOnly
-                            value={price} onChange={(e) => setPrice(e.target.value)}
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
                           />
                         </div>
                       </div>
@@ -339,15 +346,15 @@ const ProductDetail = () => {
                       Preview Image
                     </label>
                     {preview ? (
-                    <figure>
+                      <figure>
                         <img
-                        src={preview}
-                        style={{ width: "100%" }}
-                        alt="Preview Image"
+                          src={preview}
+                          style={{ width: "100%" }}
+                          alt="Preview Image"
                         />
-                    </figure>
+                      </figure>
                     ) : (
-                    ""
+                      ""
                     )}
                   </div>
                 </div>

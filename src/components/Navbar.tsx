@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from '../app/store';
 import { LogOut, reset } from "../features/authSlice";
 import "../assets/css/style.css";
-import logo from "../assets/img/vector.svg"
+import logo from "../assets/img/logo.png"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
