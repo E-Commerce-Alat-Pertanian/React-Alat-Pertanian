@@ -40,7 +40,7 @@ const EditProduct = () => {
     setDescription(response.data.description);
     setIdCategory(response.data.idCategory);
     setPrice(response.data.price);
-    setStock(response.data.stock);
+    setStock(response.data.stok.length > 0 ? response.data.stok[0].stok : 0);
     setFile(response.data.image)
     setPreview(response.data.url);
   };
@@ -257,17 +257,24 @@ const EditProduct = () => {
                             display: "inline-flex",
                           }}
                         >
-                          <input
-                            type="text"
+                          <select
+                            name="course"
+                            id="course"
                             style={{
                               fontSize: 16,
                               border: "none",
                               outline: "none",
                               width: "100%",
                             }}
-                            placeholder="Type Category here"
-                            value={idCategory} onChange={(e) => setIdCategory(e.target.value)}
-                          />
+                            aria-readonly
+                            value={idCategory}
+                            onChange={(e) => setIdCategory(e.target.value)}
+                          >
+                            <option value="1">Pupuk</option>
+                            <option value="2">Pestisida</option>
+                            <option value="3">Bibit</option>
+                            <option value="4">Alat Pertanian</option>
+                          </select>
                         </div>
                       </div>
                     </div>

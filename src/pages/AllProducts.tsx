@@ -17,22 +17,26 @@ import order from "../assets/img/order.svg";
 
 interface Product {
   idProduct: string;
-  nama: string
+  nama: string;
   description: string;
-  // category: string;
+  category: {
+    nama: string;
+  };
   price: string;
-  stock: string;
+  stok: {
+    stok: number;
+  }[];
   url: string;
 }
 
 const AllProducts = () => {
   const [products, setProduct] = useState<Product[]>([]);
-  const [idProduct, setIdProduct] = useState("")
+  const [idProduct, setIdProduct] = useState("");
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { isError } = useSelector((state: RootState) => state.auth);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  // const [categoryCounts, setCategoryCounts] = useState<{ [key: string]: number }>({});
+  const [categoryCounts, setCategoryCounts] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     dispatch(getMe());
@@ -67,7 +71,7 @@ const AllProducts = () => {
   const handleToProductId = async (userId: string | number): Promise<void> => {
     try {
       const data = await axios.get(`http://localhost:5000/produk/${userId}`);
-      setIdProduct(data.data.idProduct)
+      setIdProduct(data.data.idProduct);
       getProduct();
       navigate(`/products/view/${userId}`);
     } catch (error) {
@@ -81,15 +85,15 @@ const AllProducts = () => {
 
   const getProduct = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/produk/product");
-      setProduct(response.data);
-      console.log(response.data);
+      const response = await axios.get("http://localhost:5000/produk");
+      setProduct(response.data.data);
+      console.log(response.data.data);
 
-      // const counts: { [key: string]: number } = {};
-      // response.data.forEach((product: Product) => {
-      // counts[product.category] = (counts[product.category] || 0) + 1;
-      // });
-      // setCategoryCounts(counts);
+      const counts: { [key: string]: number } = {};
+      response.data.data.forEach((product: Product) => {
+        counts[product.category.nama] = (counts[product.category.nama] || 0) + 1;
+      });
+      setCategoryCounts(counts);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -99,7 +103,7 @@ const AllProducts = () => {
     userId: string | number
   ): Promise<void> => {
     try {
-      await axios.delete(`http://localhost:5000/produk/${userId}`);
+      await axios.delete(`http://localhost:5000/produk/product/${userId}`);
       getProduct();
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -141,7 +145,12 @@ const AllProducts = () => {
               <FontAwesomeIcon className="ms-auto" icon={faChevronDown} />
             </a>
 
-            {/* <a href="">{Object.keys(categoryCounts).map(category => (
+            <ul
+              id="forms-nav"
+              className="nav-content collapse"
+              data-bs-parent="#sidebar-nav"
+            >
+              {Object.keys(categoryCounts).map((category) => (
                 <li key={category}>
                   <a
                     href="#"
@@ -155,7 +164,7 @@ const AllProducts = () => {
                   </a>
                 </li>
               ))}
-              </a> */}
+            </ul>
           </li>
         </ul>
       </aside>
@@ -197,7 +206,9 @@ const AllProducts = () => {
             gap: "24px",
           }}
         >
-          {products.map((product) => (
+          {products
+            .filter((product) => !selectedCategory || product.category.nama === selectedCategory)
+            .map((product) => (
             <div key={product.idProduct} className="card-body card">
               <nav
                 className="header-nav"
@@ -270,7 +281,7 @@ const AllProducts = () => {
                       wordWrap: "break-word",
                     }}
                   >
-                    {/* {product.category} */}
+                    {product.category.nama}
                   </div>
                   <div
                     style={{
@@ -377,7 +388,7 @@ const AllProducts = () => {
                       wordWrap: "break-word",
                     }}
                   >
-                    {product.stock}
+                    {product.stok[0]?.stok ?? 0}
                   </div>
                 </div>
               </div>

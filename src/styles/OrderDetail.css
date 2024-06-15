@@ -2,12 +2,27 @@
 # Page Title
 --------------------------------------------------------------*/
 .pagetitle-detail {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.pagetitle-detail h1 {
+  font-size: 24px;
+  margin-bottom: 0;
+  font-weight: 600;
+  color: #000000;
+}
+
+@media print {
+  /* Sembunyikan elemen-elemen yang tidak ingin dicetak */
+  body * {
+    visibility: hidden;
   }
-  
-  .pagetitle-detail h1 {
-    font-size: 24px;
-    margin-bottom: 0;
-    font-weight: 600;
-    color: #000000;
+
+  /* Tampilkan hanya bagian yang ingin dicetak */
+  .printable,
+  .printable * {
+    visibility: visible;
+    position: relative;
   }
+}
+

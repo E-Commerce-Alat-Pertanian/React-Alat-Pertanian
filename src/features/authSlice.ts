@@ -6,6 +6,7 @@ import { RootState } from "../app/store";
 interface User {
   id: string;
   username: string;
+  role: string;
   // Add other fields as needed
 }
 

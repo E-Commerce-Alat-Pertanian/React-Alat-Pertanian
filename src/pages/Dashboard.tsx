@@ -10,15 +10,21 @@ interface Order {
   idOrder: string;
   status: string
   createdAt: string;
-  // category: string;
   customer: {
     username: string;
   };
   ongkir: string;
+  totalPembayaran: string;
 }
 
 const Dashboard = () => {
   const [orders, setOrder] = useState<Order[]>([]);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalPayment, setTotalPayment] = useState(0);
+  const [activeOrders, setActiveOrders] = useState(0);
+  const [activePayment, setActivePayment] = useState(0);
+  const [completedOrders, setCompletedOrders] = useState(0);
+  const [completedPayment, setCompletedPayment] = useState(0);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { isError } = useSelector((state: RootState) => state.auth);
@@ -40,17 +46,42 @@ const Dashboard = () => {
   const getOrder = async () => {
     try {
       const response = await axios.get("http://localhost:5000/order/order");
-      setOrder(response.data.data);
-      console.log(response.data.data);
+      setOrder(response.data);
 
-      // const counts: { [key: string]: number } = {};
-      // response.data.forEach((product: Product) => {
-      // counts[product.category] = (counts[product.category] || 0) + 1;
-      // });
-      // setCategoryCounts(counts);
+      const totalOrdersCount = response.data.length;
+      setTotalOrders(totalOrdersCount);
+
+      const totalPaymentAmount = response.data.reduce((acc: number, order: Order) => acc + parseFloat(order.totalPembayaran), 0);
+      setTotalPayment(totalPaymentAmount);
+
+      const activeOrdersData = response.data.filter((order: Order) => order.status === "Pending" || order.status === "Dikirim");
+      const activeOrdersCount = activeOrdersData.length;
+      const activePaymentAmount = activeOrdersData.reduce((acc: number, order: Order) => acc + parseFloat(order.totalPembayaran), 0);
+      setActiveOrders(activeOrdersCount);
+      setActivePayment(activePaymentAmount);
+
+      const completedOrdersData = response.data.filter((order: Order) => order.status === "Completed");
+      const completedOrdersCount = completedOrdersData.length;
+      const completedPaymentAmount = completedOrdersData.reduce((acc: number, order: Order) => acc + parseFloat(order.totalPembayaran), 0);
+      setCompletedOrders(completedOrdersCount);
+      setCompletedPayment(completedPaymentAmount);
+
+      console.log(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+  };  
+
+  // Fungsi untuk memformat angka sebagai mata uang IDR
+  const formatCurrency = (number: string | number) => {
+    // Konversi string ke number
+    const num = typeof number === 'string' ? parseFloat(number) : number;
+    
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(num);
   };
 
   return (
@@ -95,8 +126,8 @@ const Dashboard = () => {
                           />
                         </div>
                         <div className="ps-3">
-                          <h6>Rp.200.000.000</h6>
-                          <h6 style={{ fontSize: "1.4em" }}>3</h6>
+                          <h6>{formatCurrency(totalPayment)}</h6>
+                          <h6 style={{ fontSize: "1.4em" }}>{totalOrders}</h6>
                         </div>
                       </div>
                     </div>
@@ -126,8 +157,8 @@ const Dashboard = () => {
                           />
                         </div>
                         <div className="ps-3">
-                          <h6>Rp.200.000</h6>
-                          <h6 style={{ fontSize: "1.4em" }}>5</h6>
+                          <h6>{formatCurrency(activePayment)}</h6>
+                          <h6 style={{ fontSize: "1.4em" }}>{activeOrders}</h6>
                         </div>
                       </div>
                     </div>
@@ -157,8 +188,8 @@ const Dashboard = () => {
                           />
                         </div>
                         <div className="ps-3">
-                          <h6>Rp.200.000.000</h6>
-                          <h6 style={{ fontSize: "1.4em" }}>3</h6>
+                          <h6>{formatCurrency(completedPayment)}</h6>
+                          <h6 style={{ fontSize: "1.4em" }}>{completedOrders}</h6>
                         </div>
                       </div>
                     </div>
@@ -183,10 +214,12 @@ const Dashboard = () => {
                   <table id="table-id" className="table datatable printable">
                     <thead>
                       <tr>
-                        <th>Order ID</th>
+                        <th>No</th>
                         <th>Date</th>
                         <th>Customer Name</th>
                         <th>Status</th>
+                        <th>Ongkir</th>
+                        <th>Harga</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -196,6 +229,8 @@ const Dashboard = () => {
                         <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                         <td>{order.customer.username}</td>
                         <td>{order.status}</td>
+                        <td>{formatCurrency(order.ongkir)}</td>
+                        <td>{formatCurrency(order.totalPembayaran)}</td>
                       </tr>
                       ))}
         

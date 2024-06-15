@@ -1,19 +1,44 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { RootState, AppDispatch } from '../app/store';
+import { useNavigate, useParams } from "react-router-dom";
+import { RootState, AppDispatch } from "../app/store";
 import { getMe } from "../features/authSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDays, faPrint} from "@fortawesome/free-solid-svg-icons";
-import user from "../assets/img/user.svg"
-import bagShop from "../assets/img/bagShop.svg"
+import { faCalendarDays, faPrint } from "@fortawesome/free-solid-svg-icons";
+import userIcon from "../assets/img/user.svg";
+import bagShop from "../assets/img/bagShop.svg";
 import "../styles/OrderDetail.css";
 
+interface Keranjang {
+  product: {
+    idProduct: string;
+    nama: string;
+    price: number;
+  };
+  idOrder: string;
+  kodeUnik: string;
+  quantity: number;
+}
+
 const OrderDetail = () => {
+  const [idOrder, setIdOrder] = useState("");
+  const [kodeUnik, setKodeUnik] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [noHp, setNoHp] = useState("");
+  const [status, setStatus] = useState("");
+  const [alamat, setAlamat] = useState("");
+  const [ongkir, setOngkir] = useState(0);
+  const [keranjangs, setKeranjangs] = useState<Keranjang[]>([]);
+  const { id } = useParams();
+  const [newStatus, setNewStatus] = useState("");
+
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { isError } = useSelector((state: RootState) => state.auth);
+  const { isError, user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     dispatch(getMe());
@@ -24,7 +49,100 @@ const OrderDetail = () => {
       navigate("/");
     }
   }, [isError, navigate]);
-  
+
+  useEffect(() => {
+    getOrderById();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const getOrderById = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/order/order/${id}`
+      );
+      const order = response.data;
+      setIdOrder(response.data.idOrder);
+      setKodeUnik(response.data.kodeUnik);
+      setCreatedAt(moment(response.data.createdAt).format("DD-MM-YYYY"));
+      setUsername(response.data.customer.username);
+      setEmail(response.data.customer.email);
+      setNoHp(response.data.customer.noHp);
+      setStatus(response.data.status);
+      setAlamat(response.data.customer.alamat);
+      setOngkir(response.data.ongkir);
+      setKeranjangs(order.keranjangs);
+    } catch (error) {
+      console.error("There was an error fetching the order!", error);
+    }
+  };
+
+  const calculateSubtotal = () => {
+    return keranjangs.reduce((total, keranjang) => {
+      return total + keranjang.product.price * keranjang.quantity;
+    }, 0);
+  };
+
+  const subtotal = calculateSubtotal();
+
+  type OrderStatus = "Pending" | "Dikirim" | "Completed";
+
+  const getStatusStyle = (status: OrderStatus): string => {
+    switch (status) {
+      case "Pending":
+        return "orange";
+      case "Dikirim":
+        return "blue";
+      case "Completed":
+        return "green";
+      default:
+        return "grey";
+    }
+  };
+
+  const isValidStatus = (status: string): status is OrderStatus => {
+    return ["Pending", "Dikirim", "Completed"].includes(status);
+  };
+
+  const handleStatusChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setNewStatus(event.target.value);
+  };
+
+  const updateOrder = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+
+    try {
+      await axios.patch(
+        `http://localhost:5000/order/order-update/${id}`,
+        { status: newStatus },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handlePrintButtonClick = () => {
+    window.print();
+  };
+
+  const formatCurrency = (number: string | number) => {
+    // Konversi string ke number
+    const num = typeof number === 'string' ? parseFloat(number) : number;
+    
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(num);
+  };
+
   return (
     <div>
       <main id="main" className="main">
@@ -45,7 +163,7 @@ const OrderDetail = () => {
           <div className="card">
             <div className="card-body">
               <div
-                className="pagetitle-detail"
+                className="pagetitle-detail printable"
                 style={{
                   marginTop: "15px",
                   display: "flex",
@@ -55,18 +173,21 @@ const OrderDetail = () => {
               >
                 <div style={{ flexGrow: 1 }}>
                   <h1 style={{ marginRight: "10px" }}>
-                    Order ID: #6743{" "}
+                    Order ID: {kodeUnik}
                     <span
                       className="px-2 py-2"
                       style={{
                         fontSize: "15px",
                         textAlign: "center",
-                        background: "orange",
+                        background: isValidStatus(status)
+                          ? getStatusStyle(status)
+                          : "grey",
                         borderRadius: "10px",
                         marginLeft: "20px",
+                        color: "white",
                       }}
                     >
-                      Pending
+                      {status}
                     </span>
                   </h1>
                   <ol className="breadcrumb mt-3" style={{ margin: 0 }}>
@@ -76,12 +197,24 @@ const OrderDetail = () => {
                         icon={faCalendarDays}
                       />
                     </li>
-                    <li className="breadcrumb-item active">
-                      26 Oktober 2022 - 30 Oktober 2022
-                    </li>
+                    <li className="breadcrumb-item active">{createdAt}</li>
                   </ol>
                 </div>
                 <div style={{ display: "flex", alignItems: "center" }}>
+                  {user && user.role === "kurir" && (
+                    <button
+                      className="btn me-2"
+                      style={{
+                        width: 150,
+                        height: 50,
+                        marginLeft: "10px",
+                        background: "#F4F2F2",
+                        border: "none",
+                      }}
+                    >
+                      Upload Image
+                    </button>
+                  )}
                   <select
                     style={{
                       width: 219,
@@ -91,10 +224,12 @@ const OrderDetail = () => {
                       borderRadius: 8,
                       border: "none",
                     }}
+                    onChange={handleStatusChange}
                   >
-                    <option value="status1">Change Status</option>
-                    <option value="status2">Delivered</option>
-                    <option value="status3">Canceled</option>
+                    <option value="">Change Status</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Dikirim">Dikirim</option>
+                    <option value="Completed">Completed</option>
                   </select>
                   <button
                     style={{
@@ -105,6 +240,7 @@ const OrderDetail = () => {
                       marginLeft: "10px",
                       border: "none",
                     }}
+                    onClick={handlePrintButtonClick}
                   >
                     <FontAwesomeIcon icon={faPrint} />
                   </button>
@@ -117,12 +253,13 @@ const OrderDetail = () => {
                       background: "#F4F2F2",
                       border: "none",
                     }}
+                    onClick={updateOrder}
                   >
                     Save
                   </button>
                 </div>
               </div>
-              <div className="row">
+              <div className="row printable">
                 <div className="col-lg-4 col-md-6">
                   <div className="card-body">
                     <div className="d-flex align-items-center">
@@ -134,10 +271,14 @@ const OrderDetail = () => {
                         }}
                       >
                         <img
-                            src={user}
-                            alt=""
-                            style={{ width: "30px", height: "30px", color: "white" }}
-                          />
+                          src={userIcon}
+                          alt=""
+                          style={{
+                            width: "30px",
+                            height: "30px",
+                            color: "white",
+                          }}
+                        />
                       </div>
                       <div className="ps-3">
                         <h5
@@ -146,9 +287,11 @@ const OrderDetail = () => {
                         >
                           Customer
                         </h5>
-                        <p style={{ marginBottom: "3px" }}>Full Name: Shiristi Singh</p>
-                        <p style={{ marginBottom: "3px" }}>Email: shiristi@gmail.com</p>
-                        <p style={{ marginBottom: "0" }}>Phone: 085358868477</p>
+                        <p style={{ marginBottom: "3px" }}>
+                          Full Name: {username}
+                        </p>
+                        <p style={{ marginBottom: "3px" }}>Email: {email}</p>
+                        <p style={{ marginBottom: "0" }}>Phone: {noHp}</p>
                       </div>
                     </div>
                   </div>
@@ -165,10 +308,14 @@ const OrderDetail = () => {
                         }}
                       >
                         <img
-                            src={bagShop}
-                            alt=""
-                            style={{ width: "30px", height: "30px", color: "white" }}
-                          />
+                          src={bagShop}
+                          alt=""
+                          style={{
+                            width: "30px",
+                            height: "30px",
+                            color: "white",
+                          }}
+                        />
                       </div>
                       <div className="ps-3">
                         <h5
@@ -177,9 +324,10 @@ const OrderDetail = () => {
                         >
                           Order Info
                         </h5>
-                        <p style={{ marginBottom: "3px" }}>Shipping: Raja Ongkir</p>
-                        <p style={{ marginBottom: "3px" }}>Payment Method: Paypal</p>
-                        <p style={{ marginBottom: "0px" }}>Status: Pending</p>
+                        <p style={{ marginBottom: "3px" }}>
+                          Shipping: Raja Ongkir
+                        </p>
+                        <p style={{ marginBottom: "0px" }}>Status: {status}</p>
                       </div>
                     </div>
                   </div>
@@ -196,10 +344,14 @@ const OrderDetail = () => {
                         }}
                       >
                         <img
-                            src={bagShop}
-                            alt=""
-                            style={{ width: "30px", height: "30px", color: "white" }}
-                          />
+                          src={bagShop}
+                          alt=""
+                          style={{
+                            width: "30px",
+                            height: "30px",
+                            color: "white",
+                          }}
+                        />
                       </div>
                       <div className="ps-3">
                         <h5
@@ -208,7 +360,7 @@ const OrderDetail = () => {
                         >
                           Deliver To
                         </h5>
-                        <p>Address: Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+                        <p>Address: {alamat}</p>
                       </div>
                     </div>
                   </div>
@@ -228,11 +380,11 @@ const OrderDetail = () => {
                 Products
               </h5>
 
-              <table id="table-id" className="table">
+              <table id="table-id" className="table printable">
                 <thead>
                   <tr>
+                    <th style={{ textAlign: "left" }}>Product ID</th>
                     <th style={{ textAlign: "left" }}>Product Name</th>
-                    <th style={{ textAlign: "left" }}>Order ID</th>
                     <th>Quantity</th>
                     <th></th>
                     <th className="pe-4" style={{ textAlign: "right" }}>
@@ -241,35 +393,24 @@ const OrderDetail = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td style={{ textAlign: "left" }}>Lorem, ipsum.</td>
-                    <td className="ps-4" style={{ textAlign: "left" }}>
-                      #1
-                    </td>
-                    <td>3</td>
-                    <td></td>
-                    <td style={{ textAlign: "right" }}>Rp.100.000</td>
-                  </tr>
-                  <tr>
-                    <td style={{ textAlign: "left" }}>Lorem, ipsum.</td>
-                    <td className="ps-4" style={{ textAlign: "left" }}>
-                      #2
-                    </td>
-                    <td>2</td>
-                    <td></td>
-                    <td style={{ textAlign: "right" }}>Rp.50.000</td>
-                  </tr>
-                  <tr>
-                    <td style={{ textAlign: "left" }}>Lorem, ipsum.</td>
-                    <td className="ps-4" style={{ textAlign: "left" }}>
-                      #3
-                    </td>
-                    <td>1</td>
-                    <td></td>
-                    <td style={{ textAlign: "right" }}>Rp.20.000</td>
-                  </tr>
+                  {keranjangs.map((keranjang, index) => (
+                    <tr key={index}>
+                      <td style={{ textAlign: "left" }}>
+                        {keranjang.product.idProduct}
+                      </td>
+                      <td className="ps-4" style={{ textAlign: "left" }}>
+                        {keranjang.product.nama}
+                      </td>
+                      <td>{keranjang.quantity}</td>
+                      <td></td>
+                      <td style={{ textAlign: "right" }}>
+                      {formatCurrency(keranjang.product.price * keranjang.quantity)}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
+
               <table id="table-id" className="table">
                 <thead>
                   <tr>
@@ -317,8 +458,12 @@ const OrderDetail = () => {
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td style={{ textAlign: "right" }}>Subtotal</td>
-                    <td style={{ textAlign: "right" }}>Rp.200.000</td>
+                    <td className="printable" style={{ textAlign: "right" }}>
+                      Subtotal
+                    </td>
+                    <td className="printable" style={{ textAlign: "right" }}>
+                    {formatCurrency(subtotal)}
+                    </td>
                   </tr>
                   <tr>
                     <td></td>
@@ -353,8 +498,12 @@ const OrderDetail = () => {
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td style={{ textAlign: "right" }}>Ongkos Kirim</td>
-                    <td style={{ textAlign: "right" }}>Rp.30.000</td>
+                    <td className="printable" style={{ textAlign: "right" }}>
+                      Ongkos Kirim
+                    </td>
+                    <td className="printable" style={{ textAlign: "right" }}>
+                    {formatCurrency(ongkir)}
+                    </td>
                   </tr>
                   <tr>
                     <td></td>
@@ -389,11 +538,17 @@ const OrderDetail = () => {
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td style={{ textAlign: "right", fontSize: "25px" }}>
+                    <td
+                      className="printable"
+                      style={{ textAlign: "right", fontSize: "25px" }}
+                    >
                       Total
                     </td>
-                    <td style={{ textAlign: "right", fontSize: "25px" }}>
-                      Rp.230.000
+                    <td
+                      className="printable"
+                      style={{ textAlign: "right", fontSize: "25px" }}
+                    >
+                      {formatCurrency(subtotal + ongkir)}
                     </td>
                   </tr>
                 </tbody>

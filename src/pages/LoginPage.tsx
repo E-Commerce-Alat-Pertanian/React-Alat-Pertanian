@@ -14,8 +14,12 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user || isSuccess) {
-      navigate('/dashboard');
+    if (user && isSuccess) {
+      if (user.role === "admin") {
+        navigate('/dashboard');
+      } else {
+        navigate('/order-list');
+      }
     }
     dispatch(reset());
   }, [user, isSuccess, dispatch, navigate]);
@@ -52,10 +56,6 @@ const LoginPage: React.FC = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
-                  </div>
-                  <div className="form-check mb-3">
-                    <input className="form-check-input" type="checkbox" value="" id="form2Example31" />
-                    <label className="form-check-label">Keep me logged in?</label>
                   </div>
                   <button
                     id="loginButton"

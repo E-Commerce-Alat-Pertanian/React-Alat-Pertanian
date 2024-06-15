@@ -10,6 +10,7 @@ import ProductDetail from "./pages/ProductDetail";
 import AddProduct from "./pages/AddProduct";
 import EditProduct from "./pages/EditProduct";
 import OrderDetail from "./pages/OrderDetail";
+import UploadImageKurir from "./pages/UploadImageKurir";
 
 function App() {
   return (
@@ -53,12 +54,22 @@ function App() {
           }
         />
         <Route
-          path="/order-detail"
+          path="/order-detail/:id"
           element={
             <>
               <Navbar />
               <Sidebar />
               <OrderDetail />
+            </>
+          }
+        />
+        <Route
+          path="/order-list/:id"
+          element={
+            <>
+              <Navbar />
+              <Sidebar />
+              <UploadImageKurir />
             </>
           }
         />

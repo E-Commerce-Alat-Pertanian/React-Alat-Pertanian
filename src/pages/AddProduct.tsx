@@ -11,9 +11,11 @@ const AddProduct: React.FC = () => {
   const [description, setDescription] = useState("");
   const [idCategory, setIdCategory] = useState("");
   const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+
+  const [stok, setStok] = useState("");
+
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate(); 
   const { isError } = useSelector((state: RootState) => state.auth);
@@ -35,7 +37,6 @@ const AddProduct: React.FC = () => {
     formData.append("description", description);
     formData.append("idCategory", idCategory);
     formData.append("price", price);
-    formData.append("stock", stock);
     if (file) {
       formData.append("file", file);
     }
@@ -52,6 +53,33 @@ const AddProduct: React.FC = () => {
         }
       );
       console.log(response.data);
+
+      const productId = response.data.idProduct;
+      
+      const formDataStock = new FormData();
+      formDataStock.append("idProduct", productId);
+      formDataStock.append("stok", stok);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/stock",
+        formDataStock,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log(response.data);
+      navigate("/products");
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.log(error.response?.data); // Log detailed error response
+      } else {
+        console.log(error);
+      }
+    }
+    console.log(response.data);
       navigate("/products");
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -264,6 +292,7 @@ const AddProduct: React.FC = () => {
                         </div>
                       </div>
                     </div>
+                    
                     <label
                       className="card-title"
                       style={{ fontWeight: "bolder", color: "black" }}
@@ -310,8 +339,8 @@ const AddProduct: React.FC = () => {
                               width: "100%",
                             }}
                             placeholder="1258"
-                            value={stock}
-                            onChange={(e) => setStock(e.target.value)}
+                            value={stok}
+                            onChange={(e) => setStok(e.target.value)}
                           />
                         </div>
                       </div>

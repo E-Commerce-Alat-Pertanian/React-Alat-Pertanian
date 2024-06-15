@@ -36,10 +36,27 @@ const ProductDetail = () => {
     const response = await axios.get(`http://localhost:5000/produk/${id}`);
     setNama(response.data.nama);
     setDescription(response.data.description);
-    setIdCategory(response.data.idCategory);
     setPrice(response.data.price);
-    setStock(response.data.stock);
+    setStock(response.data.stok.length > 0 ? response.data.stok[0].stok : 0);
+    
     setPreview(response.data.url);
+
+    switch (response.data.idCategory) {
+      case 1:
+          setIdCategory("Pupuk");
+          break;
+      case 2:
+          setIdCategory("Pestisida");
+          break;
+      case 3:
+          setIdCategory("Bibit");
+          break;
+      case 4:
+          setIdCategory("Alat Pertanian");
+          break;
+      default:
+          setIdCategory("");
+  }
   };
 
   return (
@@ -209,7 +226,7 @@ const ProductDetail = () => {
                             display: "inline-flex",
                           }}
                         >
-                          <select
+                          <input
                             name="course"
                             id="course"
                             style={{
@@ -218,15 +235,11 @@ const ProductDetail = () => {
                               outline: "none",
                               width: "100%",
                             }}
-                            required
+                            aria-readonly
                             value={idCategory}
                             onChange={(e) => setIdCategory(e.target.value)}
                           >
-                            <option value="1">Pupuk</option>
-                            <option value="2">Pestisida</option>
-                            <option value="3">Bibit</option>
-                            <option value="4">Alat Pertanian</option>
-                          </select>
+                          </input>
                         </div>
                       </div>
                     </div>

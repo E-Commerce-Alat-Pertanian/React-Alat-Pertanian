@@ -34,9 +34,6 @@ const Navbar = () => {
 
         <nav className="header-nav ms-auto">
           <ul className="d-flex align-items-center">
-          <li className="nav-item dropdown pe-3">
-                <FontAwesomeIcon icon={faMagnifyingGlass} />
-                </li>
             <li className="nav-item dropdown pe-3">
               <button
                 className="nav-link nav-profile d-flex align-items-center pe-0"
